@@ -14,11 +14,22 @@ class Fibonacci {
 
 public:
     // TODO: 实现构造器
-    // Fibonacci()
+    Fibonacci(){
+        // 初始化斐波那契初始值
+        cache[0] = 0;
+        cache[1] = 1;
+        // 初始化缓存数组剩余元素为0（避免未定义行为）
+        for (int i = 2; i < 16; ++i) {
+            cache[i] = 0;
+        }
+        // 标记已缓存到第1项（0和1已初始化）
+        cached = 2;
+    }
+
 
     // TODO: 实现正确的缓存优化斐波那契计算
     size_t get(int i) {
-        for (; false; ++cached) {
+        for (; cached<=i; ++cached) {
             cache[cached] = cache[cached - 1] + cache[cached - 2];
         }
         return cache[i];

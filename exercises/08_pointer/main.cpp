@@ -5,6 +5,18 @@ bool is_fibonacci(int *ptr, int len, int stride) {
     ASSERT(len >= 3, "`len` should be at least 3");
     // TODO: 编写代码判断从 ptr 开始，每 stride 个元素取 1 个元素，组成长度为 n 的数列是否满足
     // arr[i + 2] = arr[i] + arr[i + 1]
+
+    for (int i = 2; i < len; ++i) {
+        // 计算前前项、前项、当前项的指针（基于步长stride）
+        int* prev_prev = ptr + (i - 2) * stride; // 第i-2项的指针
+        int* prev = ptr + (i - 1) * stride;       // 第i-1项的指针
+        int* curr = ptr + i * stride;             // 第i项的指针
+        
+        // 检查核心规则：当前项 = 前前项 + 前项
+        if (*curr != *prev_prev + *prev) {
+            return false; // 有一项不满足，直接返回false
+        }
+    }
     return true;
 }
 
