@@ -1,4 +1,4 @@
-#include "../exercise.h"
+﻿#include "../exercise.h"
 
 // READ: 函数模板 <https://zh.cppreference.com/w/cpp/language/function_template>
 // TODO: 将这个函数模板化
