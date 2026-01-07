@@ -10,6 +10,10 @@ struct Tensor4D {
     Tensor4D(unsigned int const shape_[4], T const *data_) {
         unsigned int size = 1;
         // TODO: 填入正确的 shape 并计算 size
+        for (int i = 0; i < 4; ++i) {
+            shape[i] = shape_[i];
+            size *= shape[i];
+        }
         data = new T[size];
         std::memcpy(data, data_, size * sizeof(T));
     }
@@ -28,6 +32,38 @@ struct Tensor4D {
     // 则 `this` 与 `others` 相加时，3 个形状为 `[1, 2, 1, 4]` 的子张量各自与 `others` 对应项相加。
     Tensor4D &operator+=(Tensor4D const &others) {
         // TODO: 实现单向广播的加法
+        // 我们需要遍历 *this (当前对象) 的每一个元素。
+        // 因为这是一个 4D 张量，使用 4 层嵌套循环是最直观的方法。
+        // 分别对应 4 个维度：0(N), 1(C), 2(H), 3(W)
+        for (unsigned int n = 0; n < shape[0]; ++n) {
+            for (unsigned int c = 0; c < shape[1]; ++c) {
+                for (unsigned int h = 0; h < shape[2]; ++h) {
+                    for (unsigned int w = 0; w < shape[3]; ++w) {
+                        
+                        // 1. 计算 *this (目标张量) 的一维线性索引
+                        // 公式：index = ((n * shape[1] + c) * shape[2] + h) * shape[3] + w
+                        // 这是一个标准的将多维坐标映射到一维数组的方法
+                        unsigned int self_index = ((n * shape[1] + c) * shape[2] + h) * shape[3] + w;
+
+                        // 2. 计算 others (源张量) 的对应坐标
+                        // 广播规则核心：
+                        // 如果 others 在某个维度的长度是 1，则该维度坐标永远取 0 (即复用该值)。
+                        // 否则，该维度的坐标与当前循环的坐标 (n, c, h, w) 相同。
+                        unsigned int n_o = (others.shape[0] == 1) ? 0 : n;
+                        unsigned int c_o = (others.shape[1] == 1) ? 0 : c;
+                        unsigned int h_o = (others.shape[2] == 1) ? 0 : h;
+                        unsigned int w_o = (others.shape[3] == 1) ? 0 : w;
+
+                        // 3. 计算 others 的一维线性索引
+                        // 使用 others 自己的 shape 来计算
+                        unsigned int others_index = ((n_o * others.shape[1] + c_o) * others.shape[2] + h_o) * others.shape[3] + w_o;
+
+                        // 4. 执行加法
+                        data[self_index] += others.data[others_index];
+                    }
+                }
+            }
+        }
         return *this;
     }
 };
