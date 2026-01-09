@@ -18,6 +18,31 @@ std::vector<udim> strides(std::vector<udim> const &shape) {
     // TODO: 完成函数体，根据张量形状计算张量连续存储时的步长。
     // READ: 逆向迭代器 std::vector::rbegin <https://zh.cppreference.com/w/cpp/container/vector/rbegin>
     //       使用逆向迭代器可能可以简化代码
+
+    // 初始步长累积值设为1
+    // 物理内存中最内层（最后一个维度）的元素是连续的，所以最后一个维度的步长总为1
+    udim data_volume = 1;
+
+    // 使用逆向迭代器(rbeigin, rend)从后往前遍历
+    // shape:   [d0, d1, ..., dn] -> 也就是从 dn 遍历到 d0
+    // strides: [s0, s1, ..., sn] -> 也就是从 sn 填充到 s0
+    auto it_shape = shape.rbegin();
+    auto it_stride = strides.rbegin();
+
+    while (it_shape != shape.rend()) {
+        // 1. 当前维度的步长等于目前的累积量
+        // 例如：对于最后一维，stride = 1
+        *it_stride = data_volume;
+
+        // 2. 更新累积量，供"前一个"（更外层）维度使用
+        // 下一个维度的步长 = 当前步长 * 当前维度的大小
+        data_volume *= (*it_shape);
+
+        // 迭代器前移（实际上是向数组头部移动）
+        ++it_shape;
+        ++it_stride;
+    }
+
     return strides;
 }
 
